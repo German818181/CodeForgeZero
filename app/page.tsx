@@ -216,14 +216,29 @@ export default function Dashboard() {
     }
   };
 
-  const handleWaitlist = (e: React.FormEvent) => {
+  const handleWaitlist = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailWaitlist) return;
+    
     setWaitlistStatus("submitting");
-    setTimeout(() => {
+    
+    try {
+      // 🔌 CONEXIÓN DIRECTA A LA TABLA DE SUPABASE
+      const { error } = await supabase
+        .from('waitlist')
+        .insert([{ email: emailWaitlist }]);
+
+      if (error) throw error;
+
+      // Si todo sale bien, mostramos el éxito
       setWaitlistStatus("success");
       setEmailWaitlist("");
-    }, 1000);
+      
+    } catch (error) {
+      console.error("Error guardando el correo:", error);
+      alert("Hubo un problemita guardando tu mail. ¡Intentá de nuevo!");
+      setWaitlistStatus("idle");
+    }
   };
 
   return (
