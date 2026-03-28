@@ -84,7 +84,7 @@ function OptimizeButton({ onClick, isLoading, disabled }: OptimizeButtonProps) {
           ⚙️ Auditando RAM...
         </span>
       ) : (
-        "Optimizar Código ⚡"
+        <span>Optimizar Código ⚡</span>
       )}
     </button>
   );
@@ -297,7 +297,7 @@ export default function Dashboard() {
             >
               {waitlistStatus === "idle" && "Unirme a la Beta"}
               {waitlistStatus === "submitting" && "Procesando..."}
-              {waitlistStatus === "success" && "¡Anotado! ✅"}
+              {waitlistStatus === "success" && <span>¡Anotado! ✅</span>}
             </button>
           </form>
           {waitlistStatus === "success" && (
