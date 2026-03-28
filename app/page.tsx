@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import Image from "next/image";
-// Inicializamos el cliente afuera del componente
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -35,34 +35,19 @@ type OptimizeButtonProps = {
   disabled: boolean;
 };
 
-
-
-// 2. Tu Navbar corregido y con las etiquetas bien cerradas
 function Navbar() {
   return (
     <header className="border-b border-border bg-black">
       <div className="container mx-auto px-4 py-4 max-w-7xl flex justify-between items-center">
-        
-        {/* CAJA 1: Logo y Título fusionados con facha profesional */}
         <div className="flex items-center gap-3">
-          {/* Cargamos tu imagen real. 'logo.png' debe estar en tu carpeta 'public' */}
-          {/* Ojo: si todavía no pusiste la imagen, va a dar error visual, pero el código está bien */}
           <Image src="/logo.png" alt="CodeForgeZero Logo" width={40} height={40} className="w-10 h-10 object-contain" />
           <h2 className="text-xl font-bold text-foreground tracking-tight">
             CodeForge<span className="text-primary">Zero</span>
           </h2>
         </div>
-
-        {/* CAJA 2: Cartelito Beta B2B */}
         <span className="text-xs font-mono bg-primary/20 text-primary px-2 py-1 rounded border border-primary/30">
           BETA B2B
         </span>
-
-        {/* CAJA 3: Call to Action de Inversor (para la web publicada) */}
-        {/* <button className="text-sm font-semibold bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">
-          Demo Inversores
-        </button> */}
-
       </div>
     </header>
   );
@@ -99,7 +84,6 @@ function OptimizeButton({ onClick, isLoading, disabled }: OptimizeButtonProps) {
           ⚙️ Auditando RAM...
         </span>
       ) : (
-        /* Cambio de texto: 'Optimizar o Refactorizar' es más técnico y claro */
         "Optimizar Código ⚡"
       )}
     </button>
@@ -183,7 +167,6 @@ export default function Dashboard() {
     metodo_usado: string;
   } | null>(null);
 
-  // Variables Lista de Espera
   const [emailWaitlist, setEmailWaitlist] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "submitting" | "success">("idle");
 
@@ -194,38 +177,38 @@ export default function Dashboard() {
     setShowImpact(false);
     setReport("");
     setOutputCode("");
-    setMetricas(null); // Reseteamos métricas viejas
+    setMetricas(null);
 
     try {
-      const response = await fetch("/api/optimize", {
+      // 🔌 CONEXIÓN DIRECTA AL MOTOR PYTHON V2
+      const response = await fetch("https://codeforgezero-backend.onrender.com/api/optimize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ codigo_sucio: inputCode }),
       });
 
-      const data = await response.json() as {
-        codigo_optimizado?: string;
-        reporte?: string;
-        error?: string;
-        metricas?: {
-          complejidad_espacial: string;
-          porcentaje_ahorro_ram: number;
-          metodo_usado: string;
-        };
-      };
+      const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error || "Error en el servidor");
+      if (!response.ok || data.error) throw new Error(data.error || "Error en el servidor Python");
       
-      setOutputCode(data.codigo_optimizado ?? "");
-      setReport(data.reporte ?? "Sin reporte.");
+      // Extraemos la magia desde la nueva estructura del backend
+      const datosOptimizados = data.datos_optimizados;
       
-      if (data.metricas) setMetricas(data.metricas);
+      setOutputCode(datosOptimizados?.codigo_optimizado ?? "No se generó código.");
+      setReport(datosOptimizados?.reporte ?? "Sin reporte.");
+      
+      if (datosOptimizados?.metricas) {
+        setMetricas(datosOptimizados.metricas);
+      }
+      
+      // Acá en consola vas a poder chusmear si sobrevivió al coliseo
+      console.log("⚔️ Resultado del Coliseo:", data.resultado_ejecucion_real);
       
       setShowImpact(true);
 
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Error al optimizar.";
-      setOutputCode("Error en el procesamiento.");
+      setOutputCode("Error de conexión con el motor V2.");
       setReport(message);
       setShowImpact(true);
     } finally {
@@ -248,10 +231,7 @@ export default function Dashboard() {
       <Navbar />
 
       <main className="container mx-auto px-4 py-12 max-w-7xl">
-        {/* Hero Section B2B */}
         <div className="text-center mb-12 flex flex-col items-center">
-          {/* Logo central opcional */}
-          {/* <Image src="/image_0.png" alt="CodeForgeZero Logo Central" width={100} height={100} className="w-24 h-24 object-contain mb-8" /> */}
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight text-balance">
             Escalá tu Infraestructura, <br/>
             <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">No tu Factura de AWS.</span>
@@ -262,7 +242,6 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Main Editor Section */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-4 lg:gap-8 items-stretch">
           <div className="min-h-[500px] w-full">
             <CodeEditor value={inputCode} onChange={setInputCode} />
@@ -277,10 +256,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Impact Panel */}
         <ImpactPanel visible={showImpact} report={report} metricas={metricas} />
 
-        {/* SECCIÓN LISTA DE ESPERA */}
         <div className="mt-20 mb-10 rounded-2xl border border-primary/20 bg-gradient-to-b from-primary/10 to-transparent p-8 md:p-12 text-center shadow-2xl shadow-primary/5">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Automatizá el Ahorro en tu CI/CD</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
