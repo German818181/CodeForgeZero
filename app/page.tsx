@@ -62,8 +62,10 @@ function CodeEditor({ value, onChange }: CodeEditorProps) {
         </span>
       </div>
       <textarea
+        data-gramm="false"
+        spellCheck="false"
         className="h-[420px] w-full rounded border border-border bg-background/50 p-4 font-mono text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none"
-        placeholder="Pegá tu script ineficiente de procesamiento de datos o IA aquí..."
+        placeholder="Pegá tu script ineficiente..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
@@ -284,6 +286,8 @@ export default function Dashboard() {
             <input 
               type="email" 
               required
+              data-gramm="false"
+              autoComplete="off"
               placeholder="tu@empresa.com" 
               value={emailWaitlist}
               onChange={(e) => setEmailWaitlist(e.target.value)}
@@ -295,9 +299,7 @@ export default function Dashboard() {
               disabled={waitlistStatus !== "idle"}
               className="rounded-md bg-white text-black font-bold px-6 py-3 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              {waitlistStatus === "idle" && "Unirme a la Beta"}
-              {waitlistStatus === "submitting" && "Procesando..."}
-              {waitlistStatus === "success" && <span>¡Anotado! ✅</span>}
+              {waitlistStatus === "idle" ? "Unirme a la Beta" : waitlistStatus === "submitting" ? "Procesando..." : "¡Anotado! ✅"}
             </button>
           </form>
           {waitlistStatus === "success" && (
