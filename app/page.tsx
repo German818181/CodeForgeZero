@@ -128,7 +128,7 @@ export default function Dashboard() {
         {/* HERO SECTION */}
         <div className="text-center mb-16 space-y-4">
           <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter italic uppercase italic leading-none">
-            Forge <span className="text-cyan-400 not-italic">Zero</span>
+            Forge <span className="text-cyan-400 not-italic"></span>
           </h1>
           <p className="text-slate-500 text-lg max-w-2xl mx-auto font-mono uppercase tracking-widest text-xs">
             Optimización FinOps // Auditoría de RAM // Arquitectura O(1)
