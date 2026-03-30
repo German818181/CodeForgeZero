@@ -128,7 +128,7 @@ export default function Dashboard() {
         {/* HERO SECTION */}
         <div className="text-center mb-16 space-y-4">
           <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter italic uppercase italic leading-none">
-            Forge <span className="text-cyan-400 not-italic"></span>
+            Forge <span className="text-cyan-400 not-italic">Zero</span>
           </h1>
           <p className="text-slate-500 text-lg max-w-2xl mx-auto font-mono uppercase tracking-widest text-xs">
             Optimización FinOps // Auditoría de RAM // Arquitectura O(1)
@@ -192,7 +192,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                   <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Space Complexity</p>
-                    <p className="text-3xl font-black text-cyan-400 italic">O({metricas?.complejidad_espacial ?? "1"})</p>
+                    <p className="text-3xl font-black text-cyan-400 italic">{metricas?.complejidad_espacial ?? "O(1)"}</p>
                   </div>
                   <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">RAM Reduction</p>
