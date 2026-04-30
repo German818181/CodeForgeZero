@@ -76,7 +76,7 @@ export default function Dashboard() {
     setShowImpact(false);
 
     try {
-      const urlBase = process.env.NEXT_PUBLIC_API_URL || "https://codeforgezero-backend.onrender.com/api/optimize"; 
+      const urlBase = process.env.NEXT_PUBLIC_API_URL || "https://codeforgezero-backend.onrender.com"; 
       const response = await fetch(`${urlBase}/api/optimize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
