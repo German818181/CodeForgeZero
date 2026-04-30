@@ -23,8 +23,9 @@ export async function POST(req: Request) {
     REGLAS DE ORO:
     1. AHORRO DE RAM: Si la función original devuelve listas, tu versión optimizada DEBE usar generadores (yield) para ahorrar RAM.
     2. DESTRUCCIÓN DE LATENCIA (I/O BOUND): Si detectas operaciones sincrónicas de red (ej: requests.get) iterando en bucles o comprensiones, es OBLIGATORIO transformarlas a concurrencia asincrónica usando 'asyncio' y 'aiohttp' (ej: asyncio.gather). NUNCA dejes peticiones bloqueantes secuenciales.
-    3. BREVEDAD: Código elegante y corto. Reporte de máximo 2 oraciones.
-    4. ESCAPE DE CARACTERES: Es vital que escapes correctamente las comillas dobles y los saltos de línea (\\n) dentro de los valores del JSON. No uses saltos de línea literales.
+    3. RESPETO DE INTERFAZ ESTRICTO: NO puedes cambiar la firma original de 'def' a 'async def'. Para lograr la concurrencia I/O sin romper el contrato externo, DEBES definir la lógica asincrónica internamente y ejecutarla utilizando 'asyncio.run()'.
+    4. BREVEDAD: Código elegante y corto. Reporte de máximo 2 oraciones.
+    5. ESCAPE DE CARACTERES: Es vital que escapes correctamente las comillas dobles y los saltos de línea (\\n) dentro de los valores del JSON. No uses saltos de línea literales.
         
     DEBES RESPONDER ÚNICAMENTE CON UN OBJETO JSON VÁLIDO con este formato exacto:
     {

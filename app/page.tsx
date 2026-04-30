@@ -9,7 +9,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
-// --- COMPONENTES AUXILIARES CON ESTÉTRICA FUTURISTA ---
+// --- COMPONENTES AUXILIARES CON ESTÉTICA FUTURISTA ---
 
 function Navbar() {
   return (
@@ -118,17 +118,17 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-300 font-sans selection:bg-cyan-500/30 relative">
+    <div className="min-h-screen bg-[#020617] text-slate-300 font-sans selection:bg-cyan-500/30 relative flex flex-col">
       {/* FONDO GEOMÉTRICO (GRID) */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
       <Navbar />
 
-      <main className="container mx-auto px-4 py-16 max-w-7xl relative z-10">
+      <main className="container mx-auto px-4 py-16 max-w-7xl relative z-10 flex-grow">
         
         {/* HERO SECTION */}
         <div className="text-center mb-16 space-y-4">
-          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter italic uppercase italic leading-none">
+          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-none">
             Forge <span className="text-cyan-400 not-italic">Zero</span>
           </h1>
           <p className="text-slate-500 text-lg max-w-2xl mx-auto font-mono uppercase tracking-widest text-xs">
@@ -141,7 +141,6 @@ export default function Dashboard() {
           
           <div className="h-[500px]">
             <TerminalWindow title="Source_Input.py">
-              {/* ACÁ ESTÁ EL PRIMER FIX: Agregué id y name al textarea */}
               <textarea
                 id="codigo_fuente"
                 name="codigo_fuente"
@@ -171,9 +170,13 @@ export default function Dashboard() {
 
           <div className="h-[500px]">
             <TerminalWindow title="Optimized_Output.py" color="green">
-              <div className="p-4 font-mono text-sm h-full overflow-auto text-green-400 whitespace-pre">
-                {isOptimizing ? ">> ANALYZING_AST_TREE...\n>> GENERATING_GAUSS_LOGIC..." : outputCode || ">> WAITING_FOR_COMMAND"}
-              </div>
+              {/* FIX DE SCROLL: TEXTAREA READONLY */}
+              <textarea
+                readOnly
+                spellCheck="false"
+                className="w-full h-full bg-transparent text-green-400 p-4 font-mono text-sm focus:outline-none resize-none whitespace-pre"
+                value={isOptimizing ? ">> ANALYZING_AST_TREE...\n>> GENERATING_GAUSS_LOGIC..." : outputCode || ">> WAITING_FOR_COMMAND"}
+              />
             </TerminalWindow>
           </div>
         </div>
@@ -224,14 +227,13 @@ export default function Dashboard() {
         )}
 
         {/* WAITLIST FUTURISTA */}
-        <div className="mt-32 text-center">
+        <div className="mt-32 text-center pb-16">
           <div className="max-w-2xl mx-auto space-y-8">
             <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic underline decoration-cyan-500 decoration-4 underline-offset-8">Corporate_Deployment</h2>
             <p className="text-slate-500 text-sm font-mono leading-relaxed">
               Estamos integrando el motor de auditoría en pipelines de GitHub y GitLab. Unite a la lista de espera para el despliegue Enterprise.
             </p>
             <form onSubmit={handleWaitlist} className="flex flex-col sm:flex-row gap-2">
-              {/* ACÁ ESTÁ EL SEGUNDO FIX: Agregué id y name al input */}
               <input 
                 id="email_waitlist"
                 name="email_waitlist"
