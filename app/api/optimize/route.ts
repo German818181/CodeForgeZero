@@ -18,13 +18,14 @@ export async function POST(req: Request) {
     console.log("🚀 Mandando código a Groq con JSON Mode Estricto...");
 
     const promptMaestro = `Rol: Arquitecto Cloud FinOps y QA Automation.
-    Objetivo: Optimizar el código Python para O(1) en memoria (usando yield/generadores) SIN ROMPER EL CONTRATO DE INTERFAZ.
+    Objetivo: Optimizar el código Python para O(1) en memoria (usando yield/generadores) y O(1) en tiempo I/O (usando asincronismo) SIN ROMPER EL CONTRATO DE INTERFAZ.
     
     REGLAS DE ORO:
-    1. Si la función original devuelve listas, tu versión optimizada DEBE usar generadores (yield) para ahorrar RAM.
-    2. BREVEDAD: Código elegante y corto. Reporte de máximo 2 oraciones.
-    3. ESCAPE DE CARACTERES: Es vital que escapes correctamente las comillas dobles y los saltos de línea (\\n) dentro de los valores del JSON. No uses saltos de línea literales.
-       
+    1. AHORRO DE RAM: Si la función original devuelve listas, tu versión optimizada DEBE usar generadores (yield) para ahorrar RAM.
+    2. DESTRUCCIÓN DE LATENCIA (I/O BOUND): Si detectas operaciones sincrónicas de red (ej: requests.get) iterando en bucles o comprensiones, es OBLIGATORIO transformarlas a concurrencia asincrónica usando 'asyncio' y 'aiohttp' (ej: asyncio.gather). NUNCA dejes peticiones bloqueantes secuenciales.
+    3. BREVEDAD: Código elegante y corto. Reporte de máximo 2 oraciones.
+    4. ESCAPE DE CARACTERES: Es vital que escapes correctamente las comillas dobles y los saltos de línea (\\n) dentro de los valores del JSON. No uses saltos de línea literales.
+        
     DEBES RESPONDER ÚNICAMENTE CON UN OBJETO JSON VÁLIDO con este formato exacto:
     {
       "codigo_optimizado": "tu codigo limpio aca",
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
       "metricas": {
         "complejidad_espacial": "O(1)",
         "porcentaje_ahorro_ram": 99,
-        "metodo_usado": "Expresión Generadora"
+        "metodo_usado": "Generadores y Asyncio"
       }
     }`;
 
@@ -61,12 +62,13 @@ export async function POST(req: Request) {
       throw new Error("La IA devolvió un formato inválido. Reintentando...");
     }
 
+    // Adaptamos la respuesta para que tu frontend actual la lea correctamente
     return NextResponse.json({
-      codigo_optimizado: resultado.codigo_optimizado || "",
-      reporte: resultado.reporte || "",
-      test_paso: true, 
-      test_error: "",
-      metricas: resultado.metricas || null
+      datos_optimizados: {
+        codigo_optimizado: resultado.codigo_optimizado || "",
+        reporte: resultado.reporte || "",
+        metricas: resultado.metricas || null
+      }
     });
 
   } catch (error: any) {
