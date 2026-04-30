@@ -18,25 +18,24 @@ export async function POST(req: Request) {
     console.log("🚀 Mandando código a Groq con JSON Mode Estricto...");
 
     const promptMaestro = `Rol: Arquitecto Cloud FinOps y QA Automation.
-    Objetivo: Optimizar el código Python para O(1) en memoria (usando yield/generadores) y O(1) en tiempo I/O (usando asincronismo) SIN ROMPER EL CONTRATO DE INTERFAZ.
+    Objetivo: Optimizar código Python reduciendo O(n) en memoria y O(n^2) en CPU, SIN romper la lógica de negocio.
     
-    REGLAS DE ORO:
-    1. AHORRO DE RAM: Si la función original devuelve listas, tu versión optimizada DEBE usar generadores (yield) para ahorrar RAM.
-    2. DESTRUCCIÓN DE LATENCIA (I/O BOUND): Si detectas operaciones sincrónicas de red (ej: requests.get) iterando en bucles o comprensiones, es OBLIGATORIO transformarlas a concurrencia asincrónica usando 'asyncio' y 'aiohttp' (ej: asyncio.gather). NUNCA dejes peticiones bloqueantes secuenciales.
-    3. RESPETO DE INTERFAZ ESTRICTO: NO puedes cambiar la firma original de 'def' a 'async def'. Para lograr la concurrencia I/O sin romper el contrato externo, DEBES definir la lógica asincrónica internamente y ejecutarla utilizando 'asyncio.run()'.
-    4. BREVEDAD: Código elegante y corto. Reporte de máximo 2 oraciones.
-    5. ESCAPE DE CARACTERES: Es vital que escapes correctamente las comillas dobles y los saltos de línea (\\n) dentro de los valores del JSON. No uses saltos de línea literales.
-    6. FORMATO DEL REPORTE (ESTRICTO): El valor del campo "reporte" DEBE ser una lista estructurada. Usa un salto de línea (\n) y un guión (-) para cada mejora. NUNCA escribas un solo párrafo.    
-    7. NUEVA REGLA DE CPU Y AGRUPACIÓN: Si detectas bucles anidados $O(n^2)$ buscando relaciones entre dos conjuntos de datos, ESTÁ PROHIBIDO iterar múltiples veces. DEBES crear primero un Diccionario (Hash Map) en memoria para agrupar los datos (ej: totales por usuario) en $O(n)$, y luego generar la respuesta en $O(1)$. NUNCA iteres un generador más de una vez.
-    DEBES RESPONDER ÚNICAMENTE CON UN OBJETO JSON VÁLIDO con este formato exacto:
+    REGLAS DE ORO (ESTRICTAS):
+    1. AHORRO DE RAM: Usa generadores (yield) para listas simples, PERO NUNCA iteres un generador más de una vez.
+    2. PROTECCIÓN DE CPU Y LÓGICA (OBLIGATORIO): Si detectas bucles anidados buscando datos (O(n^2)), TIENES PROHIBIDO usar generadores agotables en el segundo bucle. DEBES agrupar los datos primero usando un Diccionario (Hash Map) en memoria para que la búsqueda sea O(1).
+    3. DESTRUCCIÓN DE LATENCIA (I/O BOUND): Transforma peticiones de red sincrónicas iteradas en concurrencia asincrónica usando 'asyncio'.
+    4. EXCEPCIÓN DE INTERFAZ: Puedes usar 'asyncio.run()' internamente si necesitas asincronismo sin cambiar el 'def' principal.
+    5. FORMATO DEL REPORTE: El campo "reporte" DEBE ser una lista estructurada. Usa '\\n- ' para cada punto. PROHIBIDO usar párrafos.
+        
+    DEBES RESPONDER ÚNICAMENTE CON UN OBJETO JSON VÁLIDO:
     {
       "codigo_optimizado": "tu codigo limpio aca",
-      "reporte": "reporte muy corto aca",
+      "reporte": "- Eliminé bucle O(n^2) usando Hash Map.\\n- Reduje RAM con generadores.",
       "script_prueba": "print('test')",
       "metricas": {
-        "complejidad_espacial": "O(1)",
-        "porcentaje_ahorro_ram": 99,
-        "metodo_usado": "Generadores y Asyncio"
+        "complejidad_espacial": "O(n)",
+        "porcentaje_ahorro_ram": 80,
+        "metodo_usado": "Hash Map y Generadores"
       }
     }`;
 
