@@ -27,6 +27,7 @@ export async function POST(req: Request) {
     4. BREVEDAD: Código elegante y corto. Reporte de máximo 2 oraciones.
     5. ESCAPE DE CARACTERES: Es vital que escapes correctamente las comillas dobles y los saltos de línea (\\n) dentro de los valores del JSON. No uses saltos de línea literales.
     6. FORMATO DEL REPORTE (ESTRICTO): El valor del campo "reporte" DEBE ser una lista estructurada. Usa un salto de línea (\n) y un guión (-) para cada mejora. NUNCA escribas un solo párrafo.    
+    7. NUEVA REGLA DE CPU Y AGRUPACIÓN: Si detectas bucles anidados $O(n^2)$ buscando relaciones entre dos conjuntos de datos, ESTÁ PROHIBIDO iterar múltiples veces. DEBES crear primero un Diccionario (Hash Map) en memoria para agrupar los datos (ej: totales por usuario) en $O(n)$, y luego generar la respuesta en $O(1)$. NUNCA iteres un generador más de una vez.
     DEBES RESPONDER ÚNICAMENTE CON UN OBJETO JSON VÁLIDO con este formato exacto:
     {
       "codigo_optimizado": "tu codigo limpio aca",
