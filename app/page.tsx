@@ -76,7 +76,8 @@ export default function Dashboard() {
     setShowImpact(false);
 
     try {
-      const response = await fetch("https://codeforgezero-backend.onrender.com/api/optimize", {
+      const urlBase = process.env.NEXT_PUBLIC_API_URL || "https://codeforgezero-backend.onrender.com/api/optimize"; 
+      const response = await fetch(`${urlBase}/api/optimize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ codigo_sucio: inputCode }),
@@ -140,7 +141,10 @@ export default function Dashboard() {
           
           <div className="h-[500px]">
             <TerminalWindow title="Source_Input.py">
+              {/* ACÁ ESTÁ EL PRIMER FIX: Agregué id y name al textarea */}
               <textarea
+                id="codigo_fuente"
+                name="codigo_fuente"
                 spellCheck="false"
                 className="w-full h-full bg-transparent text-cyan-400/90 p-4 font-mono text-sm focus:outline-none resize-none placeholder:text-slate-800"
                 placeholder="# Pegá tu código ineficiente..."
@@ -227,7 +231,10 @@ export default function Dashboard() {
               Estamos integrando el motor de auditoría en pipelines de GitHub y GitLab. Unite a la lista de espera para el despliegue Enterprise.
             </p>
             <form onSubmit={handleWaitlist} className="flex flex-col sm:flex-row gap-2">
+              {/* ACÁ ESTÁ EL SEGUNDO FIX: Agregué id y name al input */}
               <input 
+                id="email_waitlist"
+                name="email_waitlist"
                 type="email" 
                 required
                 placeholder="PRO_EMAIL@COMPANY.COM"
