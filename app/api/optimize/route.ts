@@ -17,25 +17,34 @@ export async function POST(req: Request) {
 
     console.log("🚀 Mandando código a Groq con JSON Mode Estricto...");
 
-    const promptMaestro = `Rol: Arquitecto Cloud FinOps y QA Automation.
-    Objetivo: Optimizar código Python reduciendo O(n) en memoria y O(n^2) en CPU, SIN romper la lógica de negocio.
+    const promptMaestro = `Rol: Arquitecto Cloud FinOps de Élite.
+    Objetivo: Optimizar código Python reduciendo O(n) en memoria y O(n^2) en CPU, SIN romper la lógica.
     
-    REGLAS DE ORO (ESTRICTAS):
-    1. AHORRO DE RAM: Usa generadores (yield) para listas simples, PERO NUNCA iteres un generador más de una vez.
-    2. PROTECCIÓN DE CPU Y LÓGICA (OBLIGATORIO): Si detectas bucles anidados buscando datos (O(n^2)), TIENES PROHIBIDO usar generadores agotables en el segundo bucle. DEBES agrupar los datos primero usando un Diccionario (Hash Map) en memoria para que la búsqueda sea O(1).
-    3. DESTRUCCIÓN DE LATENCIA (I/O BOUND): Transforma peticiones de red sincrónicas iteradas en concurrencia asincrónica usando 'asyncio'.
-    4. EXCEPCIÓN DE INTERFAZ: Puedes usar 'asyncio.run()' internamente si necesitas asincronismo sin cambiar el 'def' principal.
-    5. FORMATO DEL REPORTE: El campo "reporte" DEBE ser una lista estructurada. Usa '\\n- ' para cada punto. PROHIBIDO usar párrafos.
+    REGLAS DE ORO:
+    1. PROHIBIDO: NUNCA iteres un generador o lista múltiples veces dentro de un bucle for.
+    2. OBLIGATORIO (CPU): Si hay bucles anidados buscando datos, DEBES crear primero un Diccionario (Hash Map) agrupando los datos, y luego usar ese diccionario.
+    3. FORMATO (ESTRICTO): El campo "reporte" DEBE ser una lista con guiones ('- '). PROHIBIDO usar párrafos.
+
+    EJEMPLO DE CÓDIGO ESPERADO (CÓPIALO COMO MODELO):
+    def calcular_totales():
+        # 1. Agrupar primero (O(n))
+        totales_dict = {}
+        for t in obtener_transacciones():
+            totales_dict[t['user_id']] = totales_dict.get(t['user_id'], 0) + t['monto']
+            
+        # 2. Generar reporte rápido (O(1))
+        return ( {'Usuario': u['nombre'], 'Total': totales_dict.get(u['id'], 0)} 
+                 for u in obtener_usuarios() if totales_dict.get(u['id'], 0) > 0 )
         
     DEBES RESPONDER ÚNICAMENTE CON UN OBJETO JSON VÁLIDO:
     {
-      "codigo_optimizado": "tu codigo limpio aca",
-      "reporte": "- Eliminé bucle O(n^2) usando Hash Map.\\n- Reduje RAM con generadores.",
+      "codigo_optimizado": "tu codigo aca",
+      "reporte": "- Se eliminó bucle O(n^2) usando un Hash Map.\\n- Se redujo el uso de memoria.",
       "script_prueba": "print('test')",
       "metricas": {
         "complejidad_espacial": "O(n)",
-        "porcentaje_ahorro_ram": 80,
-        "metodo_usado": "Hash Map y Generadores"
+        "porcentaje_ahorro_ram": 85,
+        "metodo_usado": "Hash Map"
       }
     }`;
 
