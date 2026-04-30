@@ -142,8 +142,8 @@ export default function Dashboard() {
           <div className="h-[500px]">
             <TerminalWindow title="Source_Input.py">
               <textarea
-                id="codigo_fuente"
-                name="codigo_fuente"
+                id="codigo_salida"
+                name="codigo_salida"
                 spellCheck="false"
                 className="w-full h-full bg-transparent text-cyan-400/90 p-4 font-mono text-sm focus:outline-none resize-none placeholder:text-slate-800"
                 placeholder="# Pegá tu código ineficiente..."
@@ -214,7 +214,7 @@ export default function Dashboard() {
                 <div className="bg-black/40 border border-white/5 p-6 rounded-xl">
                   <p className="text-xs font-mono text-cyan-600 mb-4 uppercase tracking-[0.4em]">_Architect_Commentary</p>
                   <div className="space-y-3">
-                    {report.split("\n").map((line, i) => (
+                  {(Array.isArray(report) ? report.join("\n") : String(report || "")).split("\n").map((line, i) => (
                       <p key={i} className="text-sm font-mono text-slate-400 flex gap-4">
                         <span className="text-cyan-500 opacity-50">[{i+1}]</span> {line}
                       </p>
