@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     3. RESPETO DE INTERFAZ ESTRICTO: NO puedes cambiar la firma original de 'def' a 'async def'. Para lograr la concurrencia I/O sin romper el contrato externo, DEBES definir la lógica asincrónica internamente y ejecutarla utilizando 'asyncio.run()'.
     4. BREVEDAD: Código elegante y corto. Reporte de máximo 2 oraciones.
     5. ESCAPE DE CARACTERES: Es vital que escapes correctamente las comillas dobles y los saltos de línea (\\n) dentro de los valores del JSON. No uses saltos de línea literales.
-        
+    6. FORMATO DEL REPORTE (ESTRICTO): El valor del campo "reporte" DEBE ser una lista estructurada. Usa un salto de línea (\n) y un guión (-) para cada mejora. NUNCA escribas un solo párrafo.    
     DEBES RESPONDER ÚNICAMENTE CON UN OBJETO JSON VÁLIDO con este formato exacto:
     {
       "codigo_optimizado": "tu codigo limpio aca",
