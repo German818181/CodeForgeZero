@@ -203,7 +203,11 @@ export default function Dashboard() {
                   </div>
                   <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">RAM Reduction</p>
-                    <p className="text-3xl font-black text-green-400 italic">-{metricas?.porcentaje_ahorro_ram ?? 85}%</p>
+                    {/* ACÁ ESTÁ LA MAGIA CORREGIDA */}
+                    <p className={`text-3xl font-black italic ${(metricas?.porcentaje_ahorro_ram ?? 85) >= 0 ? "text-green-400" : "text-red-500"}`}>
+                      {(metricas?.porcentaje_ahorro_ram ?? 85) >= 0 ? "+" : ""}
+                      {metricas?.porcentaje_ahorro_ram ?? 85}%
+                    </p>
                   </div>
                   <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Refactor Method</p>
