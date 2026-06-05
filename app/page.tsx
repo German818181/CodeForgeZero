@@ -22,7 +22,7 @@ function Navbar() {
           </h2>
         </div>
         <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 px-3 py-1 rounded-full border border-cyan-500/30 tracking-widest uppercase">
-          Neural_Core_v2
+          Neural_Core_v3
         </span>
       </div>
     </header>
@@ -61,10 +61,12 @@ export default function Dashboard() {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [showImpact, setShowImpact] = useState(false);
   const [report, setReport] = useState("");
+  // 1. ACTUALIZAMOS EL ESTADO PARA INCLUIR LA CPU
   const [metricas, setMetricas] = useState<{
-    complejidad_espacial: string;
+    complejidad_espacial?: string;
     porcentaje_ahorro_ram: number;
-    metodo_usado: string;
+    porcentaje_ahorro_cpu: number;
+    metodo_usado?: string;
   } | null>(null);
 
   const [emailWaitlist, setEmailWaitlist] = useState("");
@@ -76,7 +78,8 @@ export default function Dashboard() {
     setShowImpact(false);
 
     try {
-      const urlBase = process.env.NEXT_PUBLIC_API_URL || "https://codeforgezero-backend.onrender.com"; 
+      const urlBase = "https://codeforgezero-backend.onrender.com"; 
+      
       const response = await fetch(`${urlBase}/api/optimize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,19 +87,29 @@ export default function Dashboard() {
       });
 
       const data = await response.json();
-      const datosOptimizados = data.datos_optimizados;
-      
-      setOutputCode(datosOptimizados?.codigo_optimizado ?? "# Error en refactorización");
-      setReport(datosOptimizados?.reporte ?? "No se generó reporte técnico.");
-      
-      if (datosOptimizados?.metricas) {
-        setMetricas(datosOptimizados.metricas);
+
+      if (data.status === "exito") {
+        const resIA = data.datos_optimizados;
+        
+        setOutputCode(resIA.codigo_optimizado);
+        setReport(resIA.reporte);
+        
+        // 2. CAPTURAMOS LA MÉTRICA DE CPU DEL BACKEND
+        if (resIA.metricas) {
+          setMetricas({
+            complejidad_espacial: resIA.metricas.complejidad_espacial,
+            porcentaje_ahorro_ram: resIA.metricas.porcentaje_ahorro_ram, 
+            porcentaje_ahorro_cpu: resIA.metricas.porcentaje_ahorro_cpu, // ¡Magia inyectada!
+            metodo_usado: resIA.metricas.metodo_usado
+          });
+        }
+        setShowImpact(true);
+      } else if (data.status === "cargando") {
+        setOutputCode(">> STATUS_RETRY: El modelo se está despertando...\n>> Intentá de nuevo en unos segundos.");
       }
-      setShowImpact(true);
     } catch (error) {
-      setOutputCode("# OFFLINE: El motor de IA no responde.");
-      setReport("Error crítico de comunicación con el backend en Render.");
-      setShowImpact(true);
+      console.error("Error de conexión:", error);
+      setOutputCode("# OFFLINE: No se pudo conectar con el motor local (uvicorn).");
     } finally {
       setIsOptimizing(false);
     }
@@ -119,14 +132,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-300 font-sans selection:bg-cyan-500/30 relative flex flex-col">
-      {/* FONDO GEOMÉTRICO (GRID) */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
       <Navbar />
 
       <main className="container mx-auto px-4 py-16 max-w-7xl relative z-10 flex-grow">
         
-        {/* HERO SECTION */}
         <div className="text-center mb-16 space-y-4">
           <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-none">
             Forge <span className="text-cyan-400 not-italic">Zero</span>
@@ -136,7 +147,6 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* WORKSPACE AREA */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch mb-12">
           
           <div className="h-[500px]">
@@ -170,7 +180,6 @@ export default function Dashboard() {
 
           <div className="h-[500px]">
             <TerminalWindow title="Optimized_Output.py" color="green">
-              {/* FIX DE SCROLL: TEXTAREA READONLY */}
               <textarea
                 readOnly
                 spellCheck="false"
@@ -181,7 +190,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* IMPACT PANEL REFORMADO */}
         {showImpact && (
           <div className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="p-[1px] bg-gradient-to-r from-white/5 via-white/20 to-white/5 rounded-2xl overflow-hidden">
@@ -196,22 +204,34 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                  <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all">
+                {/* 3. GRILLA ACTUALIZADA A 4 COLUMNAS CON LA TARJETA DE CPU */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                  <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Space Complexity</p>
                     <p className="text-3xl font-black text-cyan-400 italic">{metricas?.complejidad_espacial ?? "O(1)"}</p>
                   </div>
-                  <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all">
+                  
+                  <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">RAM Reduction</p>
-                    {/* ACÁ ESTÁ LA MAGIA CORREGIDA */}
-                    <p className={`text-3xl font-black italic ${(metricas?.porcentaje_ahorro_ram ?? 85) >= 0 ? "text-green-400" : "text-red-500"}`}>
-                      {(metricas?.porcentaje_ahorro_ram ?? 85) >= 0 ? "+" : ""}
-                      {metricas?.porcentaje_ahorro_ram ?? 85}%
+                    <p className={`text-3xl font-black italic ${(metricas?.porcentaje_ahorro_ram ?? 0) >= 0 ? "text-green-400" : "text-red-500"}`}>
+                      {(metricas?.porcentaje_ahorro_ram ?? 0) >= 0 ? "+" : ""}
+                      {metricas?.porcentaje_ahorro_ram ?? 0}%
                     </p>
                   </div>
-                  <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all">
+
+                  {/* NUEVA TARJETA DE CPU */}
+                  <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-green-500/10 blur-xl rounded-full"></div>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">CPU / Time</p>
+                    <p className={`text-3xl font-black italic z-10 ${(metricas?.porcentaje_ahorro_cpu ?? 0) >= 0 ? "text-green-400" : "text-red-500"}`}>
+                      {(metricas?.porcentaje_ahorro_cpu ?? 0) >= 0 ? "+" : ""}
+                      {metricas?.porcentaje_ahorro_cpu ?? 0}%
+                    </p>
+                  </div>
+
+                  <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Refactor Method</p>
-                    <p className="text-xl font-bold text-white uppercase leading-tight">{metricas?.metodo_usado ?? "HEURISTIC"}</p>
+                    <p className="text-sm font-bold text-white uppercase leading-tight">{metricas?.metodo_usado ?? "HEURISTIC"}</p>
                   </div>
                 </div>
 
@@ -230,7 +250,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* WAITLIST FUTURISTA */}
         <div className="mt-32 text-center pb-16">
           <div className="max-w-2xl mx-auto space-y-8">
             <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic underline decoration-cyan-500 decoration-4 underline-offset-8">Corporate_Deployment</h2>
