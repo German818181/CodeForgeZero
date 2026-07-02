@@ -54,6 +54,28 @@ export default function Dashboard() {
   const [inputCode, setInputCode] = useState("");
   const [outputCode, setOutputCode] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [loadingMsgIndex, setLoadingMsgIndex] = useState(0);
+
+  const MENSAJES_CARGA = [
+    ">> ESCANEANDO_ESTRUCTURA...",
+    ">> DETECTANDO_INEFICIENCIAS...",
+    ">> APLICANDO_REFACTOR...",
+    ">> VALIDANDO_EN_SANDBOX...",
+    ">> MIDIENDO_RENDIMIENTO...",
+    ">> PROMEDIANDO_RESULTADOS...",
+    ">> CASI_LISTO...",
+  ];
+
+  useEffect(() => {
+    if (!isOptimizing) {
+      setLoadingMsgIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setLoadingMsgIndex((prev) => (prev + 1) % MENSAJES_CARGA.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isOptimizing]);
   const [showImpact, setShowImpact] = useState(false);
   const [report, setReport] = useState("");
   const [metricas, setMetricas] = useState<{
@@ -216,7 +238,7 @@ export default function Dashboard() {
                 readOnly
                 spellCheck="false"
                 className="w-full h-full bg-transparent text-green-400 p-4 font-mono text-sm focus:outline-none resize-none whitespace-pre"
-                value={isOptimizing ? ">> ANALYZING_AST_TREE...\n>> GENERATING_GAUSS_LOGIC..." : outputCode || ">> WAITING_FOR_COMMAND"}
+                value={isOptimizing ? MENSAJES_CARGA[loadingMsgIndex] : outputCode || ">> WAITING_FOR_COMMAND"}
               />
             </TerminalWindow>
           </div>
