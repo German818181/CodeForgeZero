@@ -9,8 +9,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
-// --- COMPONENTES AUXILIARES CON ESTÉTICA FUTURISTA ---
-
 function Navbar() {
   return (
     <header className="border-b border-white/5 bg-black/80 backdrop-blur-md sticky top-0 z-50">
@@ -22,7 +20,7 @@ function Navbar() {
           </h2>
         </div>
         <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 px-3 py-1 rounded-full border border-cyan-500/30 tracking-widest uppercase">
-          Neural_Core_v3
+          Neural_Core_v5
         </span>
       </div>
     </header>
@@ -31,7 +29,6 @@ function Navbar() {
 
 function TerminalWindow({ title, children, color = "cyan" }: { title: string, children: React.ReactNode, color?: "cyan" | "green" }) {
   const glowColor = color === "cyan" ? "from-cyan-500 to-blue-600" : "from-green-500 to-emerald-600";
-  const textColor = color === "cyan" ? "text-cyan-400" : "text-green-400";
 
   return (
     <div className="relative group h-full">
@@ -53,20 +50,19 @@ function TerminalWindow({ title, children, color = "cyan" }: { title: string, ch
   );
 }
 
-// --- DASHBOARD PRINCIPAL ---
-
 export default function Dashboard() {
   const [inputCode, setInputCode] = useState("");
   const [outputCode, setOutputCode] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [showImpact, setShowImpact] = useState(false);
   const [report, setReport] = useState("");
-  // 1. ACTUALIZAMOS EL ESTADO PARA INCLUIR LA CPU
   const [metricas, setMetricas] = useState<{
     complejidad_espacial?: string;
-    porcentaje_ahorro_ram: number;
-    porcentaje_ahorro_cpu: number;
+    porcentaje_ahorro_ram: number | null;
+    porcentaje_ahorro_cpu: number | null;
     metodo_usado?: string;
+    metricas_disponibles: boolean;
+    mensaje_metricas: string | null;
   } | null>(null);
 
   const [emailWaitlist, setEmailWaitlist] = useState("");
@@ -78,8 +74,8 @@ export default function Dashboard() {
     setShowImpact(false);
 
     try {
-      const urlBase = "https://codeforgezero-backend.onrender.com"; 
-      
+      const urlBase = "https://codeforgezero-backend.onrender.com";
+
       const response = await fetch(`${urlBase}/api/optimize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -90,17 +86,18 @@ export default function Dashboard() {
 
       if (data.status === "exito") {
         const resIA = data.datos_optimizados;
-        
+
         setOutputCode(resIA.codigo_optimizado);
         setReport(resIA.reporte);
-        
-        // 2. CAPTURAMOS LA MÉTRICA DE CPU DEL BACKEND
+
         if (resIA.metricas) {
           setMetricas({
             complejidad_espacial: resIA.metricas.complejidad_espacial,
-            porcentaje_ahorro_ram: resIA.metricas.porcentaje_ahorro_ram, 
-            porcentaje_ahorro_cpu: resIA.metricas.porcentaje_ahorro_cpu, // ¡Magia inyectada!
-            metodo_usado: resIA.metricas.metodo_usado
+            porcentaje_ahorro_ram: resIA.metricas.porcentaje_ahorro_ram ?? null,
+            porcentaje_ahorro_cpu: resIA.metricas.porcentaje_ahorro_cpu ?? null,
+            metodo_usado: resIA.metricas.metodo_usado,
+            metricas_disponibles: resIA.metricas.metricas_disponibles ?? true,
+            mensaje_metricas: resIA.metricas.mensaje_metricas ?? null,
           });
         }
         setShowImpact(true);
@@ -109,7 +106,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error de conexión:", error);
-      setOutputCode("# OFFLINE: No se pudo conectar con el motor local (uvicorn).");
+      setOutputCode("# OFFLINE: No se pudo conectar con el motor.");
     } finally {
       setIsOptimizing(false);
     }
@@ -130,6 +127,41 @@ export default function Dashboard() {
     }
   };
 
+  // Componente para tarjeta de métrica con soporte de N/A
+  const MetricCard = ({
+    label,
+    value,
+    disponible,
+    accentColor = "green",
+  }: {
+    label: string;
+    value: number | null;
+    disponible: boolean;
+    accentColor?: "green" | "cyan";
+  }) => {
+    const textColor = accentColor === "green" ? "text-green-400" : "text-cyan-400";
+
+    if (!disponible || value === null) {
+      return (
+        <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center relative overflow-hidden">
+          <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">{label}</p>
+          <p className="text-3xl font-black italic text-slate-600">N/A</p>
+          <p className="text-[9px] text-slate-600 font-mono mt-2 leading-tight">Librería externa no disponible en sandbox</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center relative overflow-hidden">
+        {accentColor === "green" && <div className="absolute top-0 right-0 w-16 h-16 bg-green-500/10 blur-xl rounded-full"></div>}
+        <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">{label}</p>
+        <p className={`text-3xl font-black italic z-10 ${value >= 0 ? textColor : "text-red-500"}`}>
+          {value >= 0 ? "+" : ""}{value}%
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#020617] text-slate-300 font-sans selection:bg-cyan-500/30 relative flex flex-col">
       <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
@@ -137,7 +169,7 @@ export default function Dashboard() {
       <Navbar />
 
       <main className="container mx-auto px-4 py-16 max-w-7xl relative z-10 flex-grow">
-        
+
         <div className="text-center mb-16 space-y-4">
           <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-none">
             Forge <span className="text-cyan-400 not-italic">Zero</span>
@@ -148,7 +180,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch mb-12">
-          
+
           <div className="h-[500px]">
             <TerminalWindow title="Source_Input.py">
               <textarea
@@ -204,30 +236,33 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* 3. GRILLA ACTUALIZADA A 4 COLUMNAS CON LA TARJETA DE CPU */}
+                {/* Aviso cuando las métricas no están disponibles */}
+                {metricas?.metricas_disponibles === false && metricas.mensaje_metricas && (
+                  <div className="mb-6 bg-yellow-500/5 border border-yellow-500/20 rounded-xl px-5 py-4">
+                    <p className="text-[10px] font-mono text-yellow-500/70 uppercase tracking-widest mb-1">⚠ Sandbox_Warning</p>
+                    <p className="text-xs font-mono text-slate-400 leading-relaxed">{metricas.mensaje_metricas}</p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                   <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Space Complexity</p>
                     <p className="text-3xl font-black text-cyan-400 italic">{metricas?.complejidad_espacial ?? "O(1)"}</p>
                   </div>
-                  
-                  <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center">
-                    <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">RAM Reduction</p>
-                    <p className={`text-3xl font-black italic ${(metricas?.porcentaje_ahorro_ram ?? 0) >= 0 ? "text-green-400" : "text-red-500"}`}>
-                      {(metricas?.porcentaje_ahorro_ram ?? 0) >= 0 ? "+" : ""}
-                      {metricas?.porcentaje_ahorro_ram ?? 0}%
-                    </p>
-                  </div>
 
-                  {/* NUEVA TARJETA DE CPU */}
-                  <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-green-500/10 blur-xl rounded-full"></div>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">CPU / Time</p>
-                    <p className={`text-3xl font-black italic z-10 ${(metricas?.porcentaje_ahorro_cpu ?? 0) >= 0 ? "text-green-400" : "text-red-500"}`}>
-                      {(metricas?.porcentaje_ahorro_cpu ?? 0) >= 0 ? "+" : ""}
-                      {metricas?.porcentaje_ahorro_cpu ?? 0}%
-                    </p>
-                  </div>
+                  <MetricCard
+                    label="RAM Reduction"
+                    value={metricas?.porcentaje_ahorro_ram ?? null}
+                    disponible={metricas?.metricas_disponibles ?? true}
+                    accentColor="cyan"
+                  />
+
+                  <MetricCard
+                    label="CPU / Time"
+                    value={metricas?.porcentaje_ahorro_cpu ?? null}
+                    disponible={metricas?.metricas_disponibles ?? true}
+                    accentColor="green"
+                  />
 
                   <div className="border border-white/5 bg-white/[0.02] p-6 rounded-xl hover:bg-white/[0.04] transition-all flex flex-col justify-center">
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Refactor Method</p>
@@ -238,9 +273,9 @@ export default function Dashboard() {
                 <div className="bg-black/40 border border-white/5 p-6 rounded-xl">
                   <p className="text-xs font-mono text-cyan-600 mb-4 uppercase tracking-[0.4em]">_Architect_Commentary</p>
                   <div className="space-y-3">
-                  {(Array.isArray(report) ? report.join("\n") : String(report || "")).split("\n").map((line, i) => (
+                    {(Array.isArray(report) ? report.join("\n") : String(report || "")).split("\n").map((line, i) => (
                       <p key={i} className="text-sm font-mono text-slate-400 flex gap-4">
-                        <span className="text-cyan-500 opacity-50">[{i+1}]</span> {line}
+                        <span className="text-cyan-500 opacity-50">[{i + 1}]</span> {line}
                       </p>
                     ))}
                   </div>
@@ -257,17 +292,17 @@ export default function Dashboard() {
               Estamos integrando el motor de auditoría en pipelines de GitHub y GitLab. Unite a la lista de espera para el despliegue Enterprise.
             </p>
             <form onSubmit={handleWaitlist} className="flex flex-col sm:flex-row gap-2">
-              <input 
+              <input
                 id="email_waitlist"
                 name="email_waitlist"
-                type="email" 
+                type="email"
                 required
                 placeholder="PRO_EMAIL@COMPANY.COM"
                 value={emailWaitlist}
                 onChange={(e) => setEmailWaitlist(e.target.value)}
                 className="flex-1 bg-white/5 border border-white/10 rounded-lg px-6 py-4 text-xs font-mono text-white focus:outline-none focus:border-cyan-500/50 transition-all uppercase tracking-widest"
               />
-              <button 
+              <button
                 type="submit"
                 disabled={waitlistStatus !== "idle"}
                 className="bg-white text-black font-black uppercase tracking-tighter px-10 py-4 rounded-lg hover:bg-cyan-400 transition-all text-sm disabled:opacity-50"
